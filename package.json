@@ -1,5 +1,5 @@
 {
-  "name": "sveltia-cms-auth",
+  "name": "sveltia-cms-auth-playscore",
   "version": "0.1.0",
   "license": "MIT",
   "type": "module",
@@ -7,8 +7,8 @@
   "scripts": {
     "start": "wrangler dev",
     "deploy": "wrangler deploy",
-    "check": "pnpm run '/^check:.*/'",
-    "check:audit": "pnpm audit",
+    "check": "npm run check:audit && npm run check:cspell && npm run check:prettier && npm run check:eslint",
+    "check:audit": "npm audit",
     "check:cspell": "cspell --no-progress",
     "check:prettier": "prettier --check .",
     "check:eslint": "eslint ."
@@ -23,5 +23,8 @@
     "globals": "^17.13.0",
     "prettier": "^3.9.9",
     "wrangler": "4.145.0"
+  },
+  "engines": {
+    "node": ">=24.11.0"
   }
 }
