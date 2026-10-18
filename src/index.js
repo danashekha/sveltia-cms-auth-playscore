@@ -179,6 +179,7 @@ const handleAuth = async (request, env) => {
     ALLOWED_DOMAINS,
     GITHUB_CLIENT_ID,
     GITHUB_CLIENT_SECRET,
+    GITHUB_ALLOWED_USERNAME,
     GITHUB_HOSTNAME = 'github.com',
     GITLAB_CLIENT_ID,
     GITLAB_CLIENT_SECRET,
@@ -206,6 +207,15 @@ const handleAuth = async (request, env) => {
 
   // GitHub
   if (provider === 'github') {
+    if (!GITHUB_ALLOWED_USERNAME?.trim()) {
+      return outputHTML({
+        env,
+        provider,
+        error: 'The allowed GitHub username is not configured.',
+        errorCode: 'MISCONFIGURED_ALLOWLIST',
+      });
+    }
+
     if (!GITHUB_CLIENT_ID || !GITHUB_CLIENT_SECRET) {
       return outputHTML({
         env,
@@ -303,6 +313,7 @@ const handleCallback = async (request, env) => {
   const {
     GITHUB_CLIENT_ID,
     GITHUB_CLIENT_SECRET,
+    GITHUB_ALLOWED_USERNAME,
     GITHUB_HOSTNAME = 'github.com',
     GITLAB_CLIENT_ID,
     GITLAB_CLIENT_SECRET,
@@ -386,6 +397,74 @@ const handleCallback = async (request, env) => {
       error: 'Server responded with malformed data. Please try again later.',
       errorCode: 'MALFORMED_RESPONSE',
     });
+  }
+
+  if (provider === 'github' && token) {
+    const allowedUsername = GITHUB_ALLOWED_USERNAME?.trim();
+
+    if (!allowedUsername) {
+      return outputHTML({
+        env,
+        provider,
+        error: 'The allowed GitHub username is not configured.',
+        errorCode: 'MISCONFIGURED_ALLOWLIST',
+      });
+    }
+
+    const profileURL =
+      GITHUB_HOSTNAME === 'github.com'
+        ? 'https://api.github.com/user'
+        : `https://${GITHUB_HOSTNAME}/api/v3/user`;
+    let profileResponse;
+
+    try {
+      profileResponse = await fetch(profileURL, {
+        headers: {
+          Accept: 'application/vnd.github+json',
+          Authorization: `Bearer ${token}`,
+          'User-Agent': 'sveltia-cms-auth',
+          'X-GitHub-Api-Version': '2022-11-28',
+        },
+      });
+    } catch {
+      return outputHTML({
+        env,
+        provider,
+        error: 'Failed to verify the GitHub account. Please try again.',
+        errorCode: 'GITHUB_PROFILE_REQUEST_FAILED',
+      });
+    }
+
+    if (!profileResponse.ok) {
+      return outputHTML({
+        env,
+        provider,
+        error: 'Failed to verify the GitHub account. Please try again.',
+        errorCode: 'GITHUB_PROFILE_REQUEST_FAILED',
+      });
+    }
+
+    let login;
+
+    try {
+      ({ login } = await profileResponse.json());
+    } catch {
+      return outputHTML({
+        env,
+        provider,
+        error: 'GitHub returned an invalid account profile.',
+        errorCode: 'GITHUB_PROFILE_INVALID',
+      });
+    }
+
+    if (typeof login !== 'string' || login.toLowerCase() !== allowedUsername.toLowerCase()) {
+      return outputHTML({
+        env,
+        provider,
+        error: 'This GitHub account is not allowed to sign in.',
+        errorCode: 'UNAUTHORIZED_GITHUB_USER',
+      });
+    }
   }
 
   return outputHTML({ env, provider, token, error });

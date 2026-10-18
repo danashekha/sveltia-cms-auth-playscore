@@ -85,6 +85,7 @@ Go back to the `sveltia-cms-auth` service page on the Cloudflare dashboard, sele
 
 - `GITHUB_CLIENT_ID`: **Client ID** from Step 2
 - `GITHUB_CLIENT_SECRET`: **Client Secret** from Step 2; click the **Encrypt** button to hide it
+- `GITHUB_ALLOWED_USERNAME`: GitHub login allowed to authenticate (case-insensitive). GitHub sign-in is disabled when this is not configured.
 - `GITHUB_HOSTNAME`: Required only if you’re using GitHub Enterprise Server. Default: `github.com`
 
 #### GitLab
