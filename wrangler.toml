@@ -4,5 +4,4 @@ compatibility_date = "2023-03-24"
 
 [vars]
 GITHUB_CLIENT_ID = "Ov23liInz1OzxPRYzs4i"
-GITHUB_CLIENT_SECRET = "6fdb342e60d709274473152a6159458ead9f7970"
 GITHUB_ALLOWED_USERNAME = "danashekha"
