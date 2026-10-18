@@ -484,11 +484,11 @@ export default {
     const { method, url } = request;
     const { pathname } = new URL(url);
 
-    if (method === 'GET' && ['/auth', '/oauth/authorize'].includes(pathname)) {
+    if (method === 'GET' && ['/auth', '/oauth/authorize', '/auth/authorize'].includes(pathname)) {
       return handleAuth(request, env);
     }
 
-    if (method === 'GET' && ['/callback', '/oauth/redirect'].includes(pathname)) {
+    if (method === 'GET' && ['/callback', '/oauth/redirect', '/auth/callback'].includes(pathname)) {
       return handleCallback(request, env);
     }
 
